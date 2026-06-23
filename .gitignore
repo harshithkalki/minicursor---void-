@@ -6,3 +6,4 @@ dist/
 *.js.map
 *.d.ts
 *.d.ts.map
+.DS_Store
