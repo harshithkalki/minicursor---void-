@@ -1,0 +1,8 @@
+node_modules/
+out/
+dist/
+*.vsix
+.env
+*.js.map
+*.d.ts
+*.d.ts.map

@@ -1,0 +1,33 @@
+{
+  "name": "minicursor",
+  "displayName": "Mini Cursor",
+  "version": "1.0.0",
+  "description": "this is a minicursor",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.121.0"
+  },
+  "author": "harshithReddyChiluka",
+  "type": "commonjs",
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "minicursor.helloWorld",
+        "title": "Hello from Mini Cursor"
+      }
+    ]
+  },
+  "scripts": {
+    "build": "tsc -p .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.0.0",
+    "@types/vscode": "^1.125.0",
+    "typescript": "^6.0.3"
+  },
+  "dependencies": {
+    "openai": "^6.44.0"
+  }
+}
