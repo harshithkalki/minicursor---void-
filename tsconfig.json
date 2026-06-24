@@ -3,7 +3,6 @@
     "module": "commonjs",
     "target": "ES2022",
     "outDir": "./out",
-    "rootDir": "./src",
     "types": ["node", "vscode"],
 
     "sourceMap": true,

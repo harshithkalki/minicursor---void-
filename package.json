@@ -11,6 +11,25 @@
   "type": "commonjs",
   "main": "./out/extension.js",
   "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "minicursor",
+          "title": "Mini Cursor",
+          "icon": "media/icon.svg",
+          "type": "webview"
+        }
+      ]
+    },
+    "views": {
+      "minicursor": [
+        {
+          "id": "minicursor.chatView",
+          "name": "Mini Cursor",
+          "type": "webview"
+        }
+      ]
+    },
     "commands": [
       {
         "command": "minicursor.helloWorld",
@@ -19,16 +38,23 @@
     ]
   },
   "scripts": {
-    "build": "tsc -p .",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "node esbuild.js",
+    "compile": "tsc --noEmit",
+    "watch": "node esbuild.js --watch",
+    "dev": "cd webview-ui && npx vite"
   },
   "devDependencies": {
     "@types/node": "^26.0.0",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
     "@types/vscode": "^1.125.0",
+    "esbuild": "^0.28.1",
     "typescript": "^6.0.3"
   },
   "dependencies": {
     "dotenv": "^17.4.2",
-    "openai": "^6.44.0"
+    "openai": "^6.44.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
   }
 }
