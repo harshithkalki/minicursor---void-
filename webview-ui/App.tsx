@@ -1,10 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+
+// import "vscode-webview"
 
 type Message = {
   id: number;
   sender: "user" | "ai";
   text: string;
 };
+
+declare function acquireVsCodeApi(): {
+  postMessage: (message: unknown) => void;
+};
+const vscode = acquireVsCodeApi();
 
 const App = () => {
   const [messages, setMessages] = useState<Message[]>([
@@ -14,6 +21,29 @@ const App = () => {
       text: "Hello! How can I help you today?",
     },
   ]);
+  useEffect(() => {
+    const handler = (event: MessageEvent) => {
+      console.log("webview received:", event.data);
+      const message = event.data;
+      if (message.type === "aiResponse") {
+        setMessages((prev) => {
+          const last = prev[prev.length - 1];
+          if (last?.sender === "ai") {
+            return [
+              ...prev.slice(0, -1),
+              { ...last, text: last.text + message.text },
+            ];
+          }
+          return [
+            ...prev,
+            { id: Date.now(), sender: "ai", text: message.text },
+          ];
+        });
+      }
+    };
+    window.addEventListener("message", handler);
+    return () => window.removeEventListener("message", handler);
+  }, []);
 
   const [input, setInput] = useState("");
 
@@ -29,19 +59,21 @@ const App = () => {
       },
     ]);
 
+    vscode.postMessage({ type: "userMessage", text: input });
+
     setInput("");
 
     // Demo AI response
-    setTimeout(() => {
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now() + 1,
-          sender: "ai",
-          text: "This is a placeholder AI response.",
-        },
-      ]);
-    }, 1000);
+    // setTimeout(() => {
+    //   setMessages((prev) => [
+    //     ...prev,
+    //     {
+    //       id: Date.now() + 1,
+    //       sender: "ai",
+    //       text: "This is a placeholder AI response.",
+    //     },
+    //   ]);
+    // }, 1000);
   };
 
   return (
