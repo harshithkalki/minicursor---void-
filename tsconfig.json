@@ -4,7 +4,6 @@
     "target": "ES2022",
     "outDir": "./out",
     "types": ["node", "vscode"],
-
     "sourceMap": true,
     "declaration": true,
     "declarationMap": true,
@@ -17,6 +16,7 @@
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
+    "moduleResolution": "bundler",
     "skipLibCheck": true
   }
 }
