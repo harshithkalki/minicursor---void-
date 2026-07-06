@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import ReactMarkdown from "react-markdown";
 
 // import "vscode-webview"
 
@@ -82,9 +83,8 @@ const App = () => {
         height: "100vh",
         display: "flex",
         flexDirection: "column",
-
-        margin: "0 auto",
-        border: "1px solid #ddd",
+        background: "var(--vscode-editor-background)",
+        color: "var(--vscode-editor-foreground)",
       }}
     >
       <div
@@ -106,7 +106,7 @@ const App = () => {
                 message.sender === "user" ? "flex-end" : "flex-start",
             }}
           >
-            <div
+            {/* <div
               style={{
                 maxWidth: "70%",
                 padding: "10px 14px",
@@ -116,8 +116,33 @@ const App = () => {
                 color: message.sender === "user" ? "#fff" : "#000",
               }}
             >
-              {message.text}
-            </div>
+              <ReactMarkdown>{message.text}</ReactMarkdown>
+            </div> */}
+            {message.sender === "user" ? (
+              <div
+                style={{
+                  maxWidth: "80%",
+                  padding: "8px 12px",
+                  borderRadius: "8px",
+                  background: "var(--vscode-input-background)",
+                  color: "var(--vscode-input-foreground)",
+                }}
+              >
+                <ReactMarkdown>{message.text}</ReactMarkdown>
+              </div>
+            ) : (
+              <div
+                style={{
+                  maxWidth: "80%",
+                  padding: "10px 14px",
+                  borderRadius: "12px",
+                  color: "var(--vscode-editor-foreground)",
+                  lineHeight: "1.6",
+                }}
+              >
+                <ReactMarkdown>{message.text}</ReactMarkdown>
+              </div>
+            )}
           </div>
         ))}
       </div>
@@ -126,7 +151,8 @@ const App = () => {
         style={{
           display: "flex",
           padding: "16px",
-          borderTop: "1px solid #ddd",
+          borderTop: "1px solid var(--vscode-panel-border)",
+          background: "var(--vscode-editor-background)",
           gap: "8px",
         }}
       >
@@ -138,9 +164,12 @@ const App = () => {
           onKeyDown={(e) => e.key === "Enter" && handleSend()}
           style={{
             flex: 1,
-            padding: "10px",
-            border: "1px solid #ccc",
-            borderRadius: "8px",
+            padding: "8px 10px",
+            border: "1px solid var(--vscode-input-border)",
+            borderRadius: "6px",
+            background: "var(--vscode-input-background)",
+            color: "var(--vscode-input-foreground)",
+            outline: "none",
           }}
         />
 

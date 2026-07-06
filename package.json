@@ -55,6 +55,7 @@
     "dotenv": "^17.4.2",
     "openai": "^6.44.0",
     "react": "^19.2.7",
-    "react-dom": "^19.2.7"
+    "react-dom": "^19.2.7",
+    "react-markdown": "^10.1.0"
   }
 }
