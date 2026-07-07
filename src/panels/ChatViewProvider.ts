@@ -63,8 +63,6 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
             if (!workspaceUri) throw new Error('No workspace open');
             const fileUri = vscode.Uri.joinPath(workspaceUri, this.pendingEdit.filePath);
             await vscode.workspace.fs.writeFile(fileUri, Buffer.from(this.pendingEdit.content, 'utf-8'));
-            await vscode.commands.executeCommand('workbench.action.revertFile');
-            await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
             await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
             this.pendingEdit = null;
             webviewView.webview.postMessage({ type: 'editApplied' });

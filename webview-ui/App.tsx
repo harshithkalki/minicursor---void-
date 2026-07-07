@@ -182,10 +182,28 @@ const App = () => {
             borderTop: "1px solid var(--vscode-panel-border)",
           }}
         >
-          <button onClick={() => vscode.postMessage({ type: "acceptEdit" })}>
+          <button
+            onClick={() => vscode.postMessage({ type: "acceptEdit" })}
+            style={{
+              padding: "10px 16px",
+              border: "none",
+              borderRadius: "8px",
+              cursor: "pointer",
+              backgroundColor: "var(--vscode-testing-iconPassed)",
+            }}
+          >
             Accept
           </button>
-          <button onClick={() => vscode.postMessage({ type: "rejectEdit" })}>
+          <button
+            onClick={() => vscode.postMessage({ type: "rejectEdit" })}
+            style={{
+              padding: "10px 16px",
+              border: "none",
+              borderRadius: "8px",
+              cursor: "pointer",
+              backgroundColor: "var(--vscode-testing-iconFailed)",
+            }}
+          >
             Reject
           </button>
         </div>
