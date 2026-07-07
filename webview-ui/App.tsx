@@ -41,12 +41,39 @@ const App = () => {
           ];
         });
       }
+      if (message.type === "editReady") {
+        setPendingEdit(message.filePath);
+      }
+      if (message.type === "editApplied") {
+        setPendingEdit(null);
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: Date.now(),
+            sender: "ai",
+            text: "✓ Changes applied successfully.",
+          },
+        ]);
+        // optionally add a message to the chat
+      }
+      if (message.type === "editRejected") {
+        setPendingEdit(null);
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: Date.now(),
+            sender: "ai",
+            text: "✗ Edit discarded.",
+          },
+        ]);
+      }
     };
     window.addEventListener("message", handler);
     return () => window.removeEventListener("message", handler);
   }, []);
 
   const [input, setInput] = useState("");
+  const [pendingEdit, setPendingEdit] = useState<string | null>(null);
 
   const handleSend = () => {
     if (!input.trim()) return;
@@ -146,6 +173,23 @@ const App = () => {
           </div>
         ))}
       </div>
+      {pendingEdit && (
+        <div
+          style={{
+            padding: "8px 16px",
+            display: "flex",
+            gap: "8px",
+            borderTop: "1px solid var(--vscode-panel-border)",
+          }}
+        >
+          <button onClick={() => vscode.postMessage({ type: "acceptEdit" })}>
+            Accept
+          </button>
+          <button onClick={() => vscode.postMessage({ type: "rejectEdit" })}>
+            Reject
+          </button>
+        </div>
+      )}
 
       <div
         style={{

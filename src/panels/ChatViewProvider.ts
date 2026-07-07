@@ -32,6 +32,8 @@ Rules:
 export class ChatViewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = 'minicursor.chatView';
   private chunkList: ChunkEntry[] = [];
+  private pendingEdit: { filePath: string; content: string } | null = null;
+
   
   constructor(private readonly _extensionUri: vscode.Uri) {}
 
@@ -55,6 +57,23 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     }
     // webviewView.webview.postMessage({ type: 'aiResponse', text: 'here is the answer...' });
     webviewView.webview.onDidReceiveMessage(async (message) => {
+      if (message.type === 'acceptEdit') {
+            if (!this.pendingEdit) return;
+            const workspaceUri = vscode.workspace.workspaceFolders?.[0]?.uri;
+            if (!workspaceUri) throw new Error('No workspace open');
+            const fileUri = vscode.Uri.joinPath(workspaceUri, this.pendingEdit.filePath);
+            await vscode.workspace.fs.writeFile(fileUri, Buffer.from(this.pendingEdit.content, 'utf-8'));
+            await vscode.commands.executeCommand('workbench.action.revertFile');
+            await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
+            await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
+            this.pendingEdit = null;
+            webviewView.webview.postMessage({ type: 'editApplied' });
+        }
+
+        if (message.type === 'rejectEdit') {
+            this.pendingEdit = null;
+            webviewView.webview.postMessage({ type: 'editRejected' });
+        }
         if (message.type === 'userMessage') {
             let editMessage = false;
             console.log('Received from webview:', message.text);
@@ -100,21 +119,27 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
                 }}
                 webviewView.webview.postMessage({ type: 'aiResponseEnd' });
             }else{
-                const response = await client.chat.completions.create({
+              const topFile = similarities[0]?.chunk.filePath;
+              if (!topFile) throw new Error('No relevant file found');
+              const fileUri = vscode.Uri.file(topFile);
+              const fileData = await vscode.workspace.fs.readFile(fileUri);
+              const fullFileContent = Buffer.from(fileData).toString('utf-8');
+              const response = await client.chat.completions.create({
                 response_format: { type: "json_object" },
                 model: "gpt-4o-mini",
                 messages: [
                     { role: "system", content: editPrompt },
-                    { role: "user", content: `${messageText}\n\nContext:\n${contextText}` }
+                    { role: "user", content: `${messageText}\n\nFile: ${topFile}\n\n${fullFileContent}` }
                 ]
             })
             const rawContent = response.choices[0]?.message?.content;
             if (!rawContent) throw new Error('No response from OpenAI');
             const parsed = JSON.parse(rawContent) as { filePath: string; content: string };
+            this.pendingEdit = parsed;
             const workspaceUri = vscode.workspace.workspaceFolders?.[0]?.uri;
             if (!workspaceUri) throw new Error('No workspace open');
             const originalUri = vscode.Uri.joinPath(workspaceUri, parsed.filePath);
-            const proposedUri = vscode.Uri.parse(`untitled:${parsed.filePath}.proposed`);
+            const proposedUri = vscode.Uri.parse(`untitled:MiniCursor-proposed-${Date.now()}`);
             const proposedDoc = await vscode.workspace.openTextDocument(proposedUri);
             const edit = new vscode.WorkspaceEdit();
             edit.insert(proposedUri, new vscode.Position(0, 0), parsed.content);
@@ -129,8 +154,6 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
                 type: 'editReady', 
                 filePath: parsed.filePath 
             });
-
-
             }
 
             // webviewView.webview.postMessage({ type: 'aiResponse', text: 'Echo: ' + message.text });
