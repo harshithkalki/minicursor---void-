@@ -22,10 +22,17 @@ const App = () => {
       text: "Hello! How can I help you today?",
     },
   ]);
+  const [indexing, setIndexing] = useState(true);
   useEffect(() => {
     const handler = (event: MessageEvent) => {
       console.log("webview received:", event.data);
       const message = event.data;
+      if (message.type === "indexing") {
+        setIndexing(true);
+      }
+      if (message.type === "indexingDone") {
+        setIndexing(false);
+      }
       if (message.type === "aiResponse") {
         setMessages((prev) => {
           const last = prev[prev.length - 1];
@@ -124,6 +131,22 @@ const App = () => {
           gap: "12px",
         }}
       >
+        {indexing && (
+          <div
+            style={{
+              padding: "8px 16px",
+              fontSize: "12px",
+              color: "var(--vscode-descriptionForeground)",
+              borderBottom: "1px solid var(--vscode-panel-border)",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+            }}
+          >
+            <span>⟳</span>
+            <span>Indexing workspace...</span>
+          </div>
+        )}
         {messages.map((message) => (
           <div
             key={message.id}
@@ -220,6 +243,7 @@ const App = () => {
       >
         <input
           type="text"
+          disabled={indexing}
           placeholder="Type a message..."
           value={input}
           onChange={(e) => setInput(e.target.value)}

@@ -49,12 +49,14 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     webviewView.webview.html = this.getHtml(webviewView.webview);
     const workspaceUri = vscode.workspace.workspaceFolders?.[0]?.uri;
     if (!workspaceUri) throw new Error('No workspace open');
+    webviewView.webview.postMessage({ type: 'indexing' });
     const chunk = await indexer.index(workspaceUri);
     this.chunkList = chunk;
     if (this.chunkList.length === 0) {
       webviewView.webview.postMessage({ type: 'aiResponse', text: 'No code files found in the workspace.' });
       return;
     }
+    webviewView.webview.postMessage({ type: 'indexingDone', count: this.chunkList.length });
     // webviewView.webview.postMessage({ type: 'aiResponse', text: 'here is the answer...' });
     webviewView.webview.onDidReceiveMessage(async (message) => {
       if (message.type === 'acceptEdit') {
