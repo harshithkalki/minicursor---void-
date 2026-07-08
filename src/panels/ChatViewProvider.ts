@@ -31,20 +31,29 @@ Rules:
 
 export class ChatViewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = 'minicursor.chatView';
+  private _webviewView: vscode.WebviewView | undefined;
   private chunkList: ChunkEntry[] = [];
   private pendingEdit: { filePath: string; content: string } | null = null;
 
+  public async reindex() {
+    if (!this._webviewView) return;
+    const workspaceUri = vscode.workspace.workspaceFolders?.[0]?.uri;
+    if (!workspaceUri) throw new Error('No workspace open');
+    this._webviewView.webview.postMessage({ type: 'indexing' });
+    const indexer = new Indexer();
+    this.chunkList = await indexer.index(workspaceUri);
+    this._webviewView.webview.postMessage({ type: 'indexingDone', count: this.chunkList.length });
+}
   
   constructor(private readonly _extensionUri: vscode.Uri) {}
 
   public async resolveWebviewView(webviewView: vscode.WebviewView) {
-    try{
-
-  
+    try{  
     webviewView.webview.options = {
       enableScripts: true,
       localResourceRoots: [this._extensionUri]
     };
+    this._webviewView = webviewView;
     const indexer = new Indexer();
     webviewView.webview.html = this.getHtml(webviewView.webview);
     const workspaceUri = vscode.workspace.workspaceFolders?.[0]?.uri;
