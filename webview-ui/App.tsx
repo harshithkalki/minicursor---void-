@@ -30,6 +30,16 @@ const App = () => {
       if (message.type === "indexing") {
         setIndexing(true);
       }
+      if (message.type === "error") {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: Date.now(),
+            sender: "ai",
+            text: `⚠️ ${message.text}`,
+          },
+        ]);
+      }
       if (message.type === "indexingDone") {
         setIndexing(false);
       }

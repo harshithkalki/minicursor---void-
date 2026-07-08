@@ -66,8 +66,8 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
       return;
     }
     webviewView.webview.postMessage({ type: 'indexingDone', count: this.chunkList.length });
-    // webviewView.webview.postMessage({ type: 'aiResponse', text: 'here is the answer...' });
     webviewView.webview.onDidReceiveMessage(async (message) => {
+          try {
       if (message.type === 'acceptEdit') {
             if (!this.pendingEdit) return;
             const workspaceUri = vscode.workspace.workspaceFolders?.[0]?.uri;
@@ -149,7 +149,6 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
             if (!workspaceUri) throw new Error('No workspace open');
             const originalUri = vscode.Uri.joinPath(workspaceUri, parsed.filePath);
             const proposedUri = vscode.Uri.parse(`untitled:MiniCursor-proposed-${Date.now()}`);
-            const proposedDoc = await vscode.workspace.openTextDocument(proposedUri);
             const edit = new vscode.WorkspaceEdit();
             edit.insert(proposedUri, new vscode.Position(0, 0), parsed.content);
             await vscode.workspace.applyEdit(edit);
@@ -165,13 +164,21 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
             });
             }
 
-            // webviewView.webview.postMessage({ type: 'aiResponse', text: 'Echo: ' + message.text });
         }
+        } catch (err) {
+        console.error('Message handler error:', err);
+        webviewView.webview.postMessage({ 
+            type: 'error', 
+            text: `Something went wrong: ${err instanceof Error ? err.message : String(err)}` 
         });
+    }
+      
+    })
     }catch (err) {
     console.error('resolveWebviewView error:', err);
     vscode.window.showErrorMessage(`MiniCursor failed: ${err}`);
   }
+
   }
 
   private getHtml(webview: vscode.Webview): string {
